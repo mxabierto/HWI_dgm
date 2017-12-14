@@ -27,7 +27,6 @@ $(document).ready(function() {
             }
         }
     });
-    //var urlDescargasDatos = 'partials/example.json';
     var urlDescargasDatos = '/tablero-instituciones/apicomparativa/recursos-mas-descargados/';
     var newDataSet, descargasDatos;
     //Datos mas descargados
@@ -43,7 +42,7 @@ $(document).ready(function() {
         console.log(data);
         $.each(data.recursos, function(key, value){
           var htmlDatos = '';
-          htmlDatos += '<tr><td class="datosTitle" title="'+value[0]+'"><a href="https://datos.gob.mx/busca/dataset/' + value[3] + '/resource/' + value[2] + '" >' + value[0] + '</a></td><td class="text-center">' + value[1].toLocaleString('en') + '</td></tr>';
+          htmlDatos += '<tr><td class="datosTitle" title="'+value[0]+'"><a href="https://datos.gob.mx/busca/dataset/' + value[3] + '/resource/' + value[2] + '" style="width: 345px;" >' + value[0] + '</a></td><td class="text-center datos-institucion">' + value[4].toLocaleString('en') + '</td></tr>';
           $('#table-datos tr').last().after(htmlDatos);
         });
       },
@@ -53,9 +52,15 @@ $(document).ready(function() {
       }
     });
 
-    $('[data-toggle="tooltip"]').tooltip();
+    $.ajax("https://api.datos.gob.mx/v1/resources?pageSize=1")
+       .done(function(data){
+        $("#resourcesTotal").html(data.pagination.total.toLocaleString('en'));
+      })
+       .fail(function(err){
+         console.log(err);
+      });
+    //$('[data-toggle="tooltip"]').tooltip();
 
-    //var urlDataSet = 'partials/last_json.json';
     var urlDataSet = '/tablero-instituciones/apicomparativa/';
     var downTotal = 0;
     var resourTotal = 0;
@@ -64,18 +69,22 @@ $(document).ready(function() {
       "language": {
           "paginate": {
             "previous": "Anterior",
-            "next": "Siguiente"
-          }
+            "next": "Siguiente",
+          },
+          "emptyTable": "No se encontraron resultados",
+          "zeroRecords": "No se encontraron resultados",
+          "sZeroRecords": "No se encontraron resultados",
+          "infoEmpty": "No se encontraron resultados"
         },
       "info": false,
       "bLengthChange": false,
       "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
         $('td:eq(0)', nRow).addClass("depenTitle").attr("title",aData.institucion).attr("tag", aData.slug);
-        //$('td:eq(3)', nRow).attr( "data-score",aData.apertura ).addClass("rating text-center").html("");
         $('td:eq(1), td:eq(2), td:eq(4)', nRow).addClass("text-center");
         $('td:eq(3), td:eq(2), td:eq(4)', nRow).addClass("text-center");
-        //$('td:eq(5)', nRow).addClass("starsTd text-center");
       },
+      "pagingType": "simple_numbers",
+      "order": [[ 0, "asc" ]],
       drawCallback: function(settings){
             var api = this.api();
             // Initialize custom control
@@ -120,10 +129,11 @@ $(document).ready(function() {
           $.each(json.dependencias,function(key, value){
             downTotal = downTotal + value.descargas;
             resourTotal = resourTotal + value.total;
-            $("#downloadsTotal").html(downTotal.toLocaleString('en'));
-            $("#resourcesTotal").html(resourTotal.toLocaleString('en'));
+            // $("#downloadsTotal").html(downTotal.toLocaleString('en'));
+            //$("#resourcesTotal").html(resourTotal.toLocaleString('en'));
             $("#dependencesTotal").html(json.dependencias.length);
           });
+
           return json.dependencias;
         }
       },"error": function(){
@@ -131,13 +141,18 @@ $(document).ready(function() {
         return false;
       },
       "columns": [
-          { "data": "institucion" },
-          { "data": "ranking" },
-          { "data": "total", render: $.fn.dataTable.render.number( ',', '.', 0 ) },
-          //{ "data": "apertura" },
-          { "data": "descargas", render: $.fn.dataTable.render.number( ',', '.', 0 )  }
-          //{ "data": "calidad" }
-      ]
+          { "data": "institucion", "width": 400 },
+          { "data": "publicados", render: $.fn.dataTable.render.number( ',', '.', 0 ), "width": 200 },
+          { "data": "descargas", render: $.fn.dataTable.render.number( ',', '.', 0 ), "width": 200 },
+          { "data": "ligas_no_accesibles", "width": 200 }
+      ],
+       columnDefs: [
+            { width: 200, targets: 0 },
+            { width: 200, targets: 0 },
+            { width: 200, targets: 0 },
+            { width: 200, targets: 0 }
+        ],
+        fixedColumns: true
     });
 
     $("#searchbox").keyup(function() {
@@ -149,7 +164,7 @@ $(document).ready(function() {
     function initRating(container){
       $('.rating', container).raty({
         starType: 'i',
-        hints       : ['1', '2', '3', '4', '5'],
+        hints: ['1', '2', '3', '4', '5'],
         half: true,
         starHalf: 'glyphicon glyphicon-star gly-2x',
         starOff: 'glyphicon glyphicon-star-empty gly-2x',

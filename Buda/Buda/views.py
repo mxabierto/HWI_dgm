@@ -18,7 +18,8 @@ def tabla_comparativa(request):
     calificaciones de las mimas
     URL: /tablero-instituciones/
     """
-    return render(request, 'tabla-comparativa.html', {'settings': settings})
+    total_downloads = cache.get('descargas-total', 0)
+    return render(request, 'tabla-comparativa.html', {'settings': settings, 'total_downloads': total_downloads})
 
 
 def detalle_institucion(request, slug=''):
@@ -54,7 +55,8 @@ def api_comparativa(request):
     URL: /tablero-instituciones/apicomparativa/
     RESPUESTA: Json
     """
-    dependencias_cache = cache.get('resumen-dependendencias', None)
+    dependencias_cache = cache.get('resumen-dependendencias', {'descargas': []})
+    dependencias_cache.sort(key=lambda x: x['descargas'], reverse=True)
     return JsonResponse({'dependencias': dependencias_cache})
 
 
@@ -67,7 +69,7 @@ def api_comparativa_dependencia(request, slug):
     URL: /tablero-instituciones/apicomparativa/{slug}/
     RESPUESTA: Json
     """
-    dependencias_cache = cache.get('resumen-dependendencias', None)
+    dependencias_cache = cache.get('resumen-dependendencias', [])
 
     try:
         for elemento in dependencias_cache:
@@ -98,7 +100,7 @@ def recursos_mas_descargados(request):
         ky = operator.itemgetter(1)
         recursos_ordenados_aux = sorted(ordenador.items(), key=ky, reverse=True)[:5]
 
-        recursos_ordenados = [[recursos[key[0]]['recurso'], recursos[key[0]]['descargas'], recursos[key[0]]['id'], recursos[key[0]]['dataset']] for key in recursos_ordenados_aux]
+        recursos_ordenados = [[recursos[key[0]]['recurso'], recursos[key[0]]['descargas'], recursos[key[0]]['id'], recursos[key[0]]['dataset'], recursos[key[0]]['organizacion']] for key in recursos_ordenados_aux]
 
     return JsonResponse({'recursos': recursos_ordenados}, safe=False)
 
@@ -112,26 +114,30 @@ def recursos_mas_descargados_dep(request, slug):
     URL: tablero-instituciones/apicomparativa/recursos-mas-descargados/{slug}/
     RESPUESTA: Json
     """
-    recursos = cache.get('descargas-recursos-dependencias', None)
-    recursos_ordenados = []
+    recursos_ordenados = cache.get('descargas-recursos-dependencias-{0}'.format(slug))
 
-    if recursos is not None:
-        ky = operator.itemgetter(1)
-        try:
-         rec_dep = recursos[slug]
-        except Exception:
-            raise Http404
+    if not recursos_ordenados:
+        recursos = cache.get('descargas-recursos-dependencias', None)
+        recursos_ordenados = []
 
-        aux_recurso = None
+        if recursos is not None:
+            try:
+                rec_dep = recursos[slug]
+            except Exception:
+                raise Http404
 
-        for elemento_a in range(0, len(rec_dep)):
-            for index in range(0, len(rec_dep)):
-                if index > 0:
-                    if rec_dep[index]['descargas'] > rec_dep[index - 1]['descargas']:
-                        aux_recurso = rec_dep[index - 1]
-                        rec_dep[index - 1] = rec_dep[index]
-                        rec_dep[index] = aux_recurso
+            recursos_ordenados = sorted(rec_dep, key=lambda x: x['descargas'], reverse=True)
+            cache.set('descargas-recursos-dependencias-{0}'.format(slug), recursos_ordenados, 60 * 5)
 
-        recursos_ordenados = rec_dep
+    return JsonResponse({'recursos': recursos_ordenados}, safe=False)
 
-    return JsonResponse({'recursos': recursos_ordenados[:5]}, safe=False)
+
+@csrf_exempt
+def total_de_recursos(request):
+    """
+    Vista que el total de recursos
+    contabilizados
+    URL: tablero-instituciones/apicomparativa/total-recursos/
+    RESPUESTA: Json
+    """
+    return JsonResponse({'total': cache.get('total-recursos', 0)})

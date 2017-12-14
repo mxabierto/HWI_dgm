@@ -1,6 +1,6 @@
 *.pyc
 Buda/functional_test.py
-
+config.sh
 *.sqlite3
 
 .idea

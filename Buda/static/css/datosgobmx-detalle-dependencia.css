@@ -18,3 +18,7 @@ body[unresolved] {
 .empty-space {
     margin: 2em;
 }
+
+.recurso-col {
+    font-weight: 300 !important;
+}

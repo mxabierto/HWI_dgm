@@ -8,8 +8,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="">
 
-    <!-- Bootstrap core -->
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- dataTables jquery plugin -->
     <link rel="stylesheet" type="text/css" href="{% static "css/jquery.dataTables.css" %}">
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/raty/2.7.0/jquery.raty.min.css">
@@ -20,8 +18,90 @@
     <link href="//fonts.googleapis.com/css?family=Open+Sans:Bold" rel="stylesheet" type="text/css">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" type="text/css" href="//datos.gob.mx/css/style.css">
+    <link rel="stylesheet" type="text/css" href="{{settings.CDN_GOB_ROOT_URL}}assets/css/main.css">
+    {% comment %}
     <link rel="stylesheet" href="/static/buda/css/datosgobmx-detalle-dependencia.css?18190459">
+    {% endcomment %}
+    <link rel="stylesheet" href="{% static "css/datosgobmx-detalle-dependencia.css" %}">
+    <style type="text/css">
+        .header_table { color: #0c9; text-transform: uppercase; }
+        .glyphicon-ok {color: green;}
+        .glyphicon-remove {color: red;}
+        p.author span {
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        section#landing-data .data-table {
+            margin-top: 20px;
+        }
+
+        .data-table p.author span {
+            margin-left: 8px;
+        }
+
+        .datosTitle a {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            display: inline-block;
+            width: 400px;
+        }
+
+        .data-table table>tbody>tr>td {
+            padding-bottom: 10px;
+        }
+
+        #searchbox {
+            width: 100%;
+            border: 1px solid #d8d8d8;
+            border-radius: 4px;
+            padding: 16px 0 22px 16px;
+            margin-bottom: 30px;
+        }
+
+        input#searchbox::placeholder {
+            font-size: 14px;
+        }
+
+        .table-wrapper i.fa-search {
+            position: absolute;
+            right: 30px;
+            top: 9px;
+            font-size: 20px;
+            transform: scale(-1, 1);
+            opacity: 0.6;
+            display: block;
+        }
+
+        table.dataTable tbody tr {
+            background-color: transparent;
+        }
+
+        table.dataTable.no-footer {
+            border-bottom: none;
+        }
+
+        .table>thead>tr>th {
+            border-bottom: none;
+        }
+
+        thead th:nth-of-type(1) {
+            width: 40%;
+        }
+
+        .dataTable {
+            background-color: #efefef;
+            border-radius: 4px;
+            margin-right: 0px;
+            margin-left: 0px;
+            padding: 10px;
+        }
+        .descargas-tabla { width: 25% !important; }
+        .status_link { width: 25% !important; }
+        .recurso-col { width: 50% !important;}
+    </style>
+
     {% comment %}
         <link rel="stylesheet" href="{% static "css/datosgobmx-detalle-dependencia.css" %}">
     {% endcomment %}
@@ -35,9 +115,9 @@
         <link rel="import" href="{% static "bower_components/dgm-footer/dgm-footer.html" %}">
     {% endcomment %}
 
-    <link rel="import" href="//cdn.datos.gob.mx/bower_components/polymer/polymer.html">
-    <link rel="import" href="//cdn.datos.gob.mx/bower_components/dgm-navbar/dgm-navbar.html">
-    <link rel="import" href="//cdn.datos.gob.mx/bower_components/dgm-footer/dgm-footer.html">
+    <link rel="import" href="{{settings.CDN_GOB_ROOT_URL}}bower_components/polymer/polymer.html">
+    <link rel="import" href="{{settings.CDN_GOB_ROOT_URL}}bower_components/dgm-navbar/dgm-navbar.html">
+    <link rel="import" href="{{settings.CDN_GOB_ROOT_URL}}bower_components/dgm-footer/dgm-footer.html">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -45,124 +125,64 @@
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <!-- Global Site Tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-44411606-12"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
 
+        gtag('config', 'UA-44411606-12');
+    </script>
 </head>
 <body class="front">
 <dgm-navbar></dgm-navbar>
 <div role="main">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <img id="logo_org">
-                <p>Este tablero de control se actualiza cada 24 horas.</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="row">
-                    <div class="col-md-12">
-                        <h2>Recursos publicados</h2>
-                        <div class="content ng-scope">
-                            <p>Número de recursos ya publicados contra número total de recursos por publicar.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="text-center title ng-binding">
-                            <h1><span id="issuedPublish"></span><span id="issuedTotal"></span></h1>
-                        </div>
-                    </div>
-                </div>
-                <div class="empty-space"></div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <h2>Calificación de apertura <span class="beta-highlight">| Beta</span></h2>
-                        <div class="content ng-scope">
-                            <p>Esta calificación depende de los tipos de archivos que son publicados. Para conocer más
-                                da <a href="#">click aquí.</a>
-                            </p>
-                        </div>
-                        <ul class="list-inline text-center">
-                            <li>
-                                <div id="stars-raiting"></div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="empty-space"></div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <h2>Calidad de datos <span class="beta-highlight">| Beta</span></h2>
-                        <div class="content ng-scope">
-                            <p>Para conocer cómo se genera esta calificación de calidad de los datos da <a href="#">click
-                                aquí.</a></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="text-center title ng-binding">
-                            <h1><span id="calidadDatosHtml"></span></h1>
-                        </div>
-                    </div>
-                </div>
-                <div class="empty-space"></div>
+    <section id="landing-content">
+        <div class="container-fluid">
+            <div class="breadcrumb-container">
+               <div class="container-fluid">
+                  <div class="row">
+                     <div class="col-md-12">
+                        <breadcrumb>
+                           <ul class="breadcrumb">
+                              <li><a ui-sref="landing" href="/"><i class="glyphicon glyphicon-home"></i></a></li>
+                              <li><a href="/tablero-instituciones/">Home</a></li>
+                              <li><a href="#" class="org-breadcrumb"></a></li>
+                           </ul>
+                        </breadcrumb>
+                     </div>
+                  </div>
+               </div>
             </div>
             <div class="row">
-                <div class="col-md-6">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h2>Top 5 Recursos Descargados</h2>
-                            <div class="content ng-scope">
-                                <p>Información de los 5 recursos más descargados de tu institución.</p>
-                            </div>
-                        </div>
+                <div class="col-md-12">
+                    <img id="logo_org" src="" style="height: 170px !important;">
+                </div>
+                <div class="col-md-12">
+                    <p style="margin-top: 15px; margin-bottom: 25px;">La siguiente tabla muestra todos los recursos de Datos Abiertos de la Institución, junto con el número de veces que ha sido descargado y un indicador de si el recurso está disponible o el robot tuvo problemas para descargarlo, lo que indica que el recurso no está disponible, carga demasiado lento o no es descargable por robots.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="data-table">
+                        <table class="table dataTable top-5-datos" id="top-5-datos">
+                            <thead>
+                                <tr>
+                                    <th style="color: #0c9; text-transform: uppercase;">Recurso</th>
+                                    <th style="color: #0c9; text-transform: uppercase; text-align: center;">Descargas</th>
+                                    <th style="color: #0c9; text-transform: uppercase; text-align: center;">Estatus del link</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-downloads">
+                                <tr></tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="data-table">
-                                <table class="table" id="top-5-datos">
-                                    <thead class="hidden-xs hidden-sm">
-                                    <tr>
-                                        <th>Recurso</th>
-                                        <th>Última actualización</th>
-                                        <th class="text-center">Descargas</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="table-downloads">
-                                    <tr></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="empty-space"></div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h2>Indicadores generales</h2>
-                            <div class="content ng-scope">
-                                <p>Los siguientes indicadores muestran el estado actual de tu inventario, recursos de
-                                    datos, actualizaciones, solicitudes y URLs.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <p class="author ng-binding">
-                                <span class="ng-binding">Inventario</span>
-                            </p>
-                            <div id="bar-chart1"></div>
-                        </div>
-                    </div>
-                    <div class="empty-space"></div>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="empty-space"></div>
-        </div>
-    </div>
+    </section>
 </div>
 <dgm-footer></dgm-footer>
 
@@ -174,9 +194,12 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/raty/2.7.0/jquery.raty.min.js"></script>
 <script src="//www.gstatic.com/charts/loader.js"></script>
 
-<script src="{% static "bower_components/webcomponentsjs/webcomponents-lite.min.js" %}"></script>
+<script src="{{settings.CDN_GOB_ROOT_URL}}bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
 
 <!-- Custom JS -->
+{% comment %}
+<script src="/static/buda/js/detalle-dependencia.js?12323423" type="text/javascript"></script>
+{% endcomment %}
 <script src="{% static "js/detalle-dependencia.js" %}" type="text/javascript"></script>
 <script>
     $(document).ready(function () {

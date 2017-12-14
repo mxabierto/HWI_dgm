@@ -30,7 +30,7 @@ $(document).ready(function(){
       //Ajax Get
       $.ajax({
         //url: 'http://api.datos.gob.mx/v1/data-fusion?catalog-dataset.publisher.name=SHCP&pageSize=1000',
-        url: 'http://api.datos.gob.mx/v1/data-fusion?adela.inventory.slug=' + orgName,
+        url: 'https://api.datos.gob.mx/v1/data-fusion?adela.inventory.slug=' + orgName,
         async: false,
         type: 'GET',
         success: function(data) {

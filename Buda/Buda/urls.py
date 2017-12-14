@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^tablero-instituciones/generar-resumen/$', views.genera_resumen_dependencias),
     url(r'^tablero-instituciones/apicomparativa/$', views.api_comparativa),
     url(r'^tablero-instituciones/apicomparativa/recursos-mas-descargados/$', views.recursos_mas_descargados),
+    url(r'^tablero-instituciones/apicomparativa/total-recursos/$', views.total_de_recursos),
     url(r'^tablero-instituciones/apicomparativa/recursos-mas-descargados/(?P<slug>[-_a-zA-Z0-9]+)/$', views.recursos_mas_descargados_dep),
     url(r'^tablero-instituciones/apicomparativa/(?P<slug>[-_a-zA-Z0-9]+)/$', views.api_comparativa_dependencia),
 ]

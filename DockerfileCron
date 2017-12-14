@@ -1,0 +1,20 @@
+FROM python:2-alpine
+MAINTAINER Francisco Vaquero <akura11.tt@gmail.com>
+
+RUN apk update && apk add dcron wget rsync ca-certificates && rm -rf /var/cache/apk/*
+RUN apk add git bash --update-cache && rm -rf /var/cache/apk/*
+
+RUN mkdir -p /var/log/cron && mkdir -m 0644 -p /var/spool/cron/crontabs && touch /var/log/cron/cron.log && mkdir -m 0644 -p /etc/cron.d
+
+RUN mkdir /project && touch /var/log/buda.log
+COPY . project/
+RUN pip install -r /project/requirements.txt
+
+RUN rm -rf /var/spool/cron/crontabs && mkdir -m 0644 -p /var/spool/cron/crontabs
+
+COPY Buda/Docker/Cron/cron.d /var/spool/cron/crontabs/cron_buda
+
+RUN chmod +x  /project/Buda/Buda/cron_buda.py
+RUN chmod -R 0644 /var/spool/cron/crontabs
+
+CMD crond -s /var/spool/cron/crontabs -b -L /var/log/cron/cron.log "$@" && tail -f /var/log/cron/cron.log
